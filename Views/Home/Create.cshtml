@@ -1,0 +1,56 @@
+@model UrlShortener.Models.UrlMapping
+
+@{
+    ViewData["Title"] = "Создать короткую ссылку";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">🔗 Создать короткую ссылку</h2>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="mb-4">
+                        <label asp-for="OriginalUrl" class="form-label fw-bold"></label>
+                        <input asp-for="OriginalUrl" class="form-control form-control-lg" 
+                               placeholder="https://example.com/very-long-url-that-needs-shortening" />
+                        <span asp-validation-for="OriginalUrl" class="text-danger"></span>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i> Введите полный URL, включая http:// или https://
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" class="btn btn-secondary btn-lg me-md-2">
+                            ← Отмена
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            🚀 Создать короткую ссылку
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Информационная панель -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">ℹ️ Как это работает?</h5>
+                <ul class="list-unstyled">
+                    <li>✅ Введите длинный URL</li>
+                    <li>✅ Получите короткую ссылку</li>
+                    <li>✅ Делитесь ей где угодно</li>
+                    <li>✅ Отслеживайте количество переходов</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

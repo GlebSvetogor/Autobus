@@ -1,0 +1,124 @@
+@model IEnumerable<UrlShortener.Models.UrlMapping>
+
+@{
+    ViewData["Title"] = "Главная страница";
+    var baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-4">📊 Сокращенные URL</h1>
+            <a asp-action="Create" class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-circle"></i> Создать новую ссылку
+            </a>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Длинный URL</th>
+                                    <th>Сокращенный URL</th>
+                                    <th>Дата создания</th>
+                                    <th>Количество переходов</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" 
+                                                 title="@item.OriginalUrl">
+                                                <a href="@item.OriginalUrl" target="_blank" class="text-decoration-none">
+                                                    @item.OriginalUrl
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <a href="/@item.ShortCode" target="_blank" class="text-decoration-none me-2">
+                                                    @baseUrl/@item.ShortCode
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-secondary" 
+                                                        onclick="copyToClipboard('@baseUrl/@item.ShortCode')" 
+                                                        title="Копировать">
+                                                    📋
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                        <td>
+                                            <span class="badge bg-info fs-6">@item.ClickCount</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                                                    ✏️ Редактировать
+                                                </a>
+                                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
+                                                      onsubmit="return confirm('Вы уверены, что хотите удалить эту ссылку?')">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        🗑️ Удалить
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">🔗 Пока нет сокращенных ссылок</h3>
+                        <p class="card-text text-muted">Создайте свою первую короткую ссылку!</p>
+                        <a asp-action="Create" class="btn btn-primary btn-lg">Создать ссылку</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Показываем уведомление
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ✅ Ссылка скопирована в буфер обмена!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            // Удаляем элемент после скрытия
+            toast.addEventListener('hidden.bs.toast', () => {
+                document.body.removeChild(toast);
+            });
+        }).catch(function(err) {
+            alert('Не удалось скопировать ссылку: ' + err);
+        });
+    }
+</script>

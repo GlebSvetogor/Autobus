@@ -1,0 +1,107 @@
+@model UrlShortener.Models.UrlMapping
+
+@{
+    ViewData["Title"] = "Редактировать ссылку";
+    var baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h2 class="mb-0">✏️ Редактировать ссылку</h2>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="Id" type="hidden" />
+                    <input asp-for="ShortCode" type="hidden" />
+                    <input asp-for="CreatedAt" type="hidden" />
+                    <input asp-for="ClickCount" type="hidden" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">🔗 Короткий URL</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">@baseUrl/</span>
+                            <input type="text" class="form-control" value="@Model.ShortCode" readonly />
+                            <button class="btn btn-outline-secondary" type="button" 
+                                    onclick="copyToClipboard('@baseUrl/@Model.ShortCode')" 
+                                    title="Копировать">
+                                📋
+                            </button>
+                        </div>
+                        <div class="form-text">Короткий код нельзя изменить</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="OriginalUrl" class="form-label fw-bold"></label>
+                        <input asp-for="OriginalUrl" class="form-control form-control-lg" />
+                        <span asp-validation-for="OriginalUrl" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">📊 Статистика</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">📅 Дата создания</h5>
+                                        <p class="card-text fs-5">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">👆 Количество переходов</h5>
+                                        <p class="card-text">
+                                            <span class="badge bg-info fs-4">@Model.ClickCount</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" class="btn btn-secondary btn-lg me-md-2">
+                            ← Отмена
+                        </a>
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            💾 Сохранить изменения
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ✅ Ссылка скопирована!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                document.body.removeChild(toast);
+            });
+        });
+    }
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
